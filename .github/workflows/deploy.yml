@@ -1,13 +1,12 @@
 name: CI/CD Pipeline
 
-
 on:
   push:
     branches:
-      - main    # main branchga push qilinganda ishga tushadi
+      - main
   pull_request:
     branches:
-      - main    # main branchga PR yuborilganda ishga tushadi
+      - main
 
 jobs:
   build-and-test:
@@ -25,16 +24,16 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r crm/requirements.txt
 
       - name: Run Django tests
         run: |
-          python manage.py test
+          python crm/manage.py test
 
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && success()   # faqat main branch va testlar muvaffaqiyatli bo'lsa
+    if: github.ref == 'refs/heads/main' && success()
 
     steps:
       - name: Checkout repository
@@ -47,9 +46,9 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd /home/ubuntu/crm
+            cd /home/ubuntu/crm/crm
             git pull origin main
-            source venv/bin/activate
+            source /home/ubuntu/crm/venv/bin/activate
             pip install -r requirements.txt
             python manage.py migrate
             python manage.py collectstatic --noinput
