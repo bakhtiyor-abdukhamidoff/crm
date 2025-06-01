@@ -1,6 +1,6 @@
 name: CI/CD Pipeline
 
-# Qaysi hodisalar ishga tushiradi:
+
 on:
   push:
     branches:
