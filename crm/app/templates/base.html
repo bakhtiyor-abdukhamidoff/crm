@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-background">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CRM Dashboard{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(214.3 31.8% 91.4%)",
+                        input: "hsl(214.3 31.8% 91.4%)",
+                        ring: "hsl(222.2 84% 4.9%)",
+                        background: "hsl(0 0% 100%)",
+                        foreground: "hsl(222.2 84% 4.9%)",
+                        primary: {
+                            DEFAULT: "hsl(222.2 47.4% 11.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(210 40% 96%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(0 84.2% 60.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(210 40% 96%)",
+                            foreground: "hsl(215.4 16.3% 46.9%)",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(210 40% 96%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                        card: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full">
+    <div class="min-h-full">
+        {% if user.is_authenticated %}
+        <!-- Navigation -->
+        <nav class="bg-white shadow-sm border-b">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="flex h-16 justify-between">
+                    <div class="flex">
+                        <div class="flex flex-shrink-0 items-center">
+                            <h1 class="text-xl font-bold text-primary">CRM System</h1>
+                        </div>
+                        <div class="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
+                            <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}border-primary text-primary{% else %}border-transparent text-muted-foreground hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">
+                                Dashboard
+                            </a>
+                            <a href="{% url 'customer_list' %}" class="{% if 'customer' in request.resolver_match.url_name %}border-primary text-primary{% else %}border-transparent text-muted-foreground hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">
+                                Customers
+                            </a>
+                            <a href="{% url 'product_list' %}" class="{% if 'product' in request.resolver_match.url_name %}border-primary text-primary{% else %}border-transparent text-muted-foreground hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">
+                                Products
+                            </a>
+                            <a href="{% url 'order_list' %}" class="{% if 'order' in request.resolver_match.url_name %}border-primary text-primary{% else %}border-transparent text-muted-foreground hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">
+                                Orders
+                            </a>
+                            <a href="{% url 'analytics' %}" class="{% if request.resolver_match.url_name == 'analytics' %}border-primary text-primary{% else %}border-transparent text-muted-foreground hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">
+                                Analytics
+                            </a>
+                        </div>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                        <div class="relative ml-3">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-sm text-muted-foreground">Welcome, {{ user.username }}</span>
+                                <a href="{% url 'logout' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+                                    Logout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        {% endif %}
+
+        <main>
+            {% if messages %}
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4">
+                    {% for message in messages %}
+                        <div class="rounded-md border border-border bg-card text-card-foreground shadow-sm p-4 mb-4 {% if message.tags == 'success' %}border-green-200 bg-green-50 text-green-800{% elif message.tags == 'error' %}border-red-200 bg-red-50 text-red-800{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+</body>
+</html>

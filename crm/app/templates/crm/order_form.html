@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - CRM System{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-foreground">{{ title }}</h1>
+        <p class="text-muted-foreground">Create or edit order information</p>
+    </div>
+
+    <form method="post" id="orderForm">
+        {% csrf_token %}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Order Details -->
+            <div class="lg:col-span-1">
+                <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-foreground mb-4">Order Details</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <label for="{{ form.customer.id_for_label }}" class="block text-sm font-medium text-foreground mb-2">
+                                Customer
+                            </label>
+                            {{ form.customer }}
+                            {% if form.customer.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.customer.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-foreground mb-2">
+                                Status
+                            </label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.status.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Order Summary -->
+                        <div class="border-t pt-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-foreground">Subtotal:</span>
+                                <span class="text-sm text-foreground" id="subtotal">$0.00</span>
+                            </div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-foreground">Tax (8%):</span>
+                                <span class="text-sm text-foreground" id="tax">$0.00</span>
+                            </div>
+                            <div class="flex justify-between items-center border-t pt-2">
+                                <span class="text-lg font-bold text-foreground">Total:</span>
+                                <span class="text-lg font-bold text-foreground" id="total">$0.00</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col space-y-4">
+                            <button type="submit" class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                                Save Order
+                            </button>
+                            <a href="{% url 'order_list' %}" class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="lg:col-span-2">
+                <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-foreground">Order Items</h3>
+                        <button type="button" id="addItemBtn" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3">
+                            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            Add Item
+                        </button>
+                    </div>
+
+                    <!-- Add Item Form -->
+                    <div id="addItemForm" class="mb-6 p-4 border border-dashed border-border rounded-lg bg-muted/20" style="display: none;">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Product</label>
+                                <select id="productSelect" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                                    <option value="">Select Product</option>
+                                    {% for product in products %}
+                                    <option value="{{ product.id }}" data-price="{{ product.price }}" data-name="{{ product.name }}">
+                                        {{ product.name }} - ${{ product.price }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Quantity</label>
+                                <input type="number" id="quantityInput" min="1" value="1" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Price</label>
+                                <input type="number" id="priceInput" step="0.01" readonly class="flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm ring-offset-background">
+                            </div>
+                            <div class="flex items-end">
+                                <button type="button" id="addToOrderBtn" class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-green-600 text-white hover:bg-green-700 h-10 px-4 py-2">
+                                    Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Items List -->
+                    <div id="orderItemsList">
+                        <div id="emptyState" class="text-center py-8">
+                            <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-foreground">No items yet</h3>
+                            <p class="mt-1 text-sm text-muted-foreground">Click "Add Item" to add products to this order.</p>
+                        </div>
+
+                        <div id="itemsTable" style="display: none;">
+                            <div class="overflow-hidden rounded-md border border-border">
+                                <table class="min-w-full divide-y divide-border">
+                                    <thead class="bg-muted/50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Product</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Quantity</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Price</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Total</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="itemsTableBody" class="bg-card divide-y divide-border">
+                                        <!-- Items will be added here dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden inputs for order items -->
+        <div id="hiddenInputs"></div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let orderItems = [];
+    let itemCounter = 0;
+
+    const addItemBtn = document.getElementById('addItemBtn');
+    const addItemForm = document.getElementById('addItemForm');
+    const addToOrderBtn = document.getElementById('addToOrderBtn');
+    const productSelect = document.getElementById('productSelect');
+    const quantityInput = document.getElementById('quantityInput');
+    const priceInput = document.getElementById('priceInput');
+    const emptyState = document.getElementById('emptyState');
+    const itemsTable = document.getElementById('itemsTable');
+    const itemsTableBody = document.getElementById('itemsTableBody');
+    const hiddenInputs = document.getElementById('hiddenInputs');
+
+    // Show/hide add item form
+    addItemBtn.addEventListener('click', function() {
+        addItemForm.style.display = addItemForm.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // Update price when product is selected
+    productSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const price = selectedOption.getAttribute('data-price') || '0.00';
+        priceInput.value = price;
+    });
+
+    // Add item to order
+    addToOrderBtn.addEventListener('click', function() {
+        const productId = productSelect.value;
+        const productName = productSelect.options[productSelect.selectedIndex].getAttribute('data-name');
+        const quantity = parseInt(quantityInput.value);
+        const price = parseFloat(priceInput.value);
+
+        if (!productId || !quantity || !price) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        // Check if product already exists
+        const existingItemIndex = orderItems.findIndex(item => item.productId === productId);
+        
+        if (existingItemIndex !== -1) {
+            // Update existing item
+            orderItems[existingItemIndex].quantity += quantity;
+            orderItems[existingItemIndex].total = orderItems[existingItemIndex].quantity * orderItems[existingItemIndex].price;
+        } else {
+            // Add new item
+            orderItems.push({
+                id: itemCounter++,
+                productId: productId,
+                productName: productName,
+                quantity: quantity,
+                price: price,
+                total: quantity * price
+            });
+        }
+
+        updateItemsDisplay();
+        updateOrderSummary();
+        resetAddItemForm();
+    });
+
+    function updateItemsDisplay() {
+        if (orderItems.length === 0) {
+            emptyState.style.display = 'block';
+            itemsTable.style.display = 'none';
+            return;
+        }
+
+        emptyState.style.display = 'none';
+        itemsTable.style.display = 'block';
+
+        itemsTableBody.innerHTML = '';
+        
+        orderItems.forEach(function(item) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">${item.productName}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+                    <input type="number" value="${item.quantity}" min="1" class="w-20 rounded-md border border-input bg-background px-2 py-1 text-sm" onchange="updateItemQuantity(${item.id}, this.value)">
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground">$${item.price.toFixed(2)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">$${item.total.toFixed(2)}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+                    <button type="button" onclick="removeItem(${item.id})" class="text-red-600 hover:text-red-800">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </button>
+                </td>
+            `;
+            itemsTableBody.appendChild(row);
+        });
+
+        updateHiddenInputs();
+    }
+
+    function updateHiddenInputs() {
+        hiddenInputs.innerHTML = '';
+        
+        orderItems.forEach(function(item, index) {
+            hiddenInputs.innerHTML += `
+                <input type="hidden" name="items[${index}][product_id]" value="${item.productId}">
+                <input type="hidden" name="items[${index}][quantity]" value="${item.quantity}">
+                <input type="hidden" name="items[${index}][price]" value="${item.price}">
+            `;
+        });
+    }
+
+    function updateOrderSummary() {
+        const subtotal = orderItems.reduce((sum, item) => sum + item.total, 0);
+        const tax = subtotal * 0.08;
+        const total = subtotal + tax;
+
+        document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
+        document.getElementById('tax').textContent = '$' + tax.toFixed(2);
+        document.getElementById('total').textContent = '$' + total.toFixed(2);
+    }
+
+    function resetAddItemForm() {
+        productSelect.value = '';
+        quantityInput.value = '1';
+        priceInput.value = '';
+        addItemForm.style.display = 'none';
+    }
+
+    // Global functions for inline event handlers
+    window.updateItemQuantity = function(itemId, newQuantity) {
+        const item = orderItems.find(item => item.id === itemId);
+        if (item) {
+            item.quantity = parseInt(newQuantity);
+            item.total = item.quantity * item.price;
+            updateItemsDisplay();
+            updateOrderSummary();
+        }
+    };
+
+    window.removeItem = function(itemId) {
+        orderItems = orderItems.filter(item => item.id !== itemId);
+        updateItemsDisplay();
+        updateOrderSummary();
+    };
+});
+</script>
+{% endblock %}

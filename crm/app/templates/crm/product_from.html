@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - CRM System{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-foreground">{{ title }}</h1>
+        <p class="text-muted-foreground">Fill in the product information below</p>
+    </div>
+
+    <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm p-6">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <div>
+                <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-foreground mb-2">
+                    Product Name
+                </label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.name.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-foreground mb-2">
+                    Description
+                </label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                    <label for="{{ form.price.id_for_label }}" class="block text-sm font-medium text-foreground mb-2">
+                        Price ($)
+                    </label>
+                    {{ form.price }}
+                    {% if form.price.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.price.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.stock_quantity.id_for_label }}" class="block text-sm font-medium text-foreground mb-2">
+                        Stock Quantity
+                    </label>
+                    {{ form.stock_quantity }}
+                    {% if form.stock_quantity.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.stock_quantity.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div>
+                <label for="{{ form.category.id_for_label }}" class="block text-sm font-medium text-foreground mb-2">
+                    Category
+                </label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.category.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="flex justify-end space-x-4">
+                <a href="{% url 'product_list' %}" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+                    Cancel
+                </a>
+                <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                    Save Product
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

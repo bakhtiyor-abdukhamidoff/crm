@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-background">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CRM System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(214.3 31.8% 91.4%)",
+                        input: "hsl(214.3 31.8% 91.4%)",
+                        ring: "hsl(222.2 84% 4.9%)",
+                        background: "hsl(0 0% 100%)",
+                        foreground: "hsl(222.2 84% 4.9%)",
+                        primary: {
+                            DEFAULT: "hsl(222.2 47.4% 11.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        card: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full">
+    <div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-md">
+            <h2 class="mt-6 text-center text-3xl font-bold tracking-tight text-foreground">
+                Sign in to CRM System
+            </h2>
+        </div>
+
+        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm py-8 px-4 sm:px-10">
+                <form class="space-y-6" method="post">
+                    {% csrf_token %}
+                    <div>
+                        <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-foreground">
+                            Username
+                        </label>
+                        <div class="mt-1">
+                            <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" value="{{ form.username.value|default_if_none:'' }}" required>
+                           
+                        </div>
+                        {% if form.username.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.username.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-foreground">
+                            Password
+                        </label>
+                        <div class="mt-1">
+                           <input type="password" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" required>
+                           
+                        </div>
+                        {% if form.password.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.password.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    {% if form.non_field_errors %}
+                        <div class="rounded-md bg-red-50 p-4">
+                            <p class="text-sm text-red-800">{{ form.non_field_errors.0 }}</p>
+                        </div>
+                    {% endif %}
+
+                    <div>
+                        <button type="submit" class="flex w-full justify-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                            Sign in
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        input[type="text"], input[type="password"] {
+            @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+        }
+    </style>
+</body>
+</html>

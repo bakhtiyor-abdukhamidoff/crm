@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics - CRM System{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-foreground">Analytics</h1>
+        <p class="text-muted-foreground">Business insights and performance metrics</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Monthly Sales Chart -->
+        <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm p-6">
+            <h3 class="text-lg font-semibold text-foreground mb-4">Monthly Sales Trend</h3>
+            <div class="relative h-64 w-full">
+                <canvas id="monthlySalesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Product Categories Chart -->
+        <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm p-6">
+            <h3 class="text-lg font-semibold text-foreground mb-4">Product Categories</h3>
+            <div class="relative h-64 w-full">
+                <canvas id="categoriesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Order Status Chart -->
+        <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm p-6">
+            <h3 class="text-lg font-semibold text-foreground mb-4">Order Status Distribution</h3>
+            <div class="relative h-64 w-full">
+                <canvas id="orderStatusChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="rounded-lg border border-border bg-card text-card-foreground shadow-sm p-6">
+            <h3 class="text-lg font-semibold text-foreground mb-4">Key Metrics</h3>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center p-3 rounded-md bg-muted/50">
+                    <span class="text-sm font-medium text-foreground">Average Order Value</span>
+                    <span class="text-lg font-bold text-primary">$245.50</span>
+                </div>
+                <div class="flex justify-between items-center p-3 rounded-md bg-muted/50">
+                    <span class="text-sm font-medium text-foreground">Customer Retention Rate</span>
+                    <span class="text-lg font-bold text-green-600">78%</span>
+                </div>
+                <div class="flex justify-between items-center p-3 rounded-md bg-muted/50">
+                    <span class="text-sm font-medium text-foreground">Monthly Growth</span>
+                    <span class="text-lg font-bold text-blue-600">+12.5%</span>
+                </div>
+                <div class="flex justify-between items-center p-3 rounded-md bg-muted/50">
+                    <span class="text-sm font-medium text-foreground">Active Customers</span>
+                    <span class="text-lg font-bold text-purple-600">1,247</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Monthly Sales Chart
+    const monthlySalesCtx = document.getElementById('monthlySalesChart').getContext('2d');
+    const monthlySalesData = {{ monthly_sales|safe }};
+    
+    new Chart(monthlySalesCtx, {
+        type: 'bar',
+        data: {
+            labels: monthlySalesData.map(item => item.month),
+            datasets: [{
+                label: 'Sales ($)',
+                data: monthlySalesData.map(item => item.sales),
+                backgroundColor: 'hsla(222.2 47.4% 11.2% / 0.8)',
+                borderColor: 'hsl(222.2 47.4% 11.2%)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 2,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Product Categories Chart
+    const categoriesCtx = document.getElementById('categoriesChart').getContext('2d');
+    const categoryData = {{ category_data|safe }};
+    
+    new Chart(categoriesCtx, {
+        type: 'doughnut',
+        data: {
+            labels: categoryData.map(item => item.category),
+            datasets: [{
+                data: categoryData.map(item => item.count),
+                backgroundColor: [
+                    'hsl(222.2 47.4% 11.2%)',
+                    'hsl(210 40% 96%)',
+                    'hsl(0 84.2% 60.2%)',
+                    'hsl(142.1 76.2% 36.3%)',
+                    'hsl(47.9 95.8% 53.1%)',
+                    'hsl(280.4 89% 60%)'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 1,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Order Status Chart
+    const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
+    const statusData = {{ status_data|safe }};
+    
+    new Chart(orderStatusCtx, {
+        type: 'pie',
+        data: {
+            labels: statusData.map(item => item.status),
+            datasets: [{
+                data: statusData.map(item => item.count),
+                backgroundColor: [
+                    'hsl(47.9 95.8% 53.1%)',
+                    'hsl(221.2 83.2% 53.3%)',
+                    'hsl(280.4 89% 60%)',
+                    'hsl(142.1 76.2% 36.3%)',
+                    'hsl(0 84.2% 60.2%)'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 1,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
