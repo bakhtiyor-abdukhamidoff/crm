@@ -46,11 +46,12 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            set -e
             cd /home/ubuntu/crm/crm
             git pull origin main
             source /home/ubuntu/crm/venv/bin/activate
             pip install -r requirements.txt
             python manage.py migrate
             python manage.py collectstatic --noinput
-            sudo systemctl restart gunicorn
+            sudo systemctl restart gunicorn.service 
             sudo systemctl restart nginx
